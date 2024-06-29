@@ -5,10 +5,10 @@ def create_app():
 
     app.config['SECRET_KEY'] = 'sdffadffadywtefwefyv'
 
-    from .views import views
-    from .auth import auth
+    from .main import main as main_blueprint
+    from .auth import auth 
 
-    app.register_blueprint(views, url_prefix='/')
+    app.register_blueprint(main_blueprint)
     app.register_blueprint(auth, url_prefix='/')
 
     return app
