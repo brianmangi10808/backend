@@ -1,14 +1,25 @@
 from flask import Flask
+from flask_session import Session
+from flask_cors import CORS
+from flask_bcrypt import Bcrypt
+from .config import ApplicationConfig
+from .models import db
+
+bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object(ApplicationConfig)
 
-    app.config['SECRET_KEY'] = 'sdffadffadywtefwefyv'
+    bcrypt.init_app(app)
+    CORS(app, supports_credentials=True)
+    server_session = Session(app)
 
-    from .main import main as main_blueprint
-    from .auth import auth 
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
 
-    app.register_blueprint(main_blueprint)
-    app.register_blueprint(auth, url_prefix='/')
+    from .auth import auth_bp
+    app.register_blueprint(auth_bp)
 
     return app
