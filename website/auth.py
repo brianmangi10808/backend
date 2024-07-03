@@ -1,6 +1,5 @@
 from flask import Blueprint, request, session, jsonify
 from .models import db, User
-from flask import current_app
 import logging
 
 from . import bcrypt
@@ -48,32 +47,27 @@ def register_user():
 def login_user():
     try:
         data = request.json
-        current_app.logger.debug(f"Login data received: {data}")
-        
         email = data.get("email")
         password = data.get("password")
 
         if not email or not password:
-            current_app.logger.debug("Email or password missing")
             return jsonify({"error": "Email and password are required"}), 400
 
         user = User.query.filter_by(email=email).first()
 
         if not user:
-            current_app.logger.debug(f"User not found for email: {email}")
             return jsonify({"error": "User not found"}), 401
 
         if not bcrypt.check_password_hash(user.password, password):
-            current_app.logger.debug("Incorrect password")
             return jsonify({"error": "Incorrect password"}), 401
 
         session["user_id"] = user.id
-        current_app.logger.debug(f"User logged in: {user.id}")
 
         return jsonify({
             "id": user.id,
             "email": user.email
         }), 200
+
     except Exception as e:
-        current_app.logger.error(f"Login error: {e}")
-        return jsonify({"error": "An error occurred"}), 500
+        logging.error(f"Login error: {str(e)}")
+        return jsonify({"error": "An error occurred during login"}), 500
